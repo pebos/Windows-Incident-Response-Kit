@@ -33,3 +33,5 @@ Next Of Windows | Startup apps portion | https://www.nextofwindows.com/how-to-fi
 Trinitrotolune & LReeder14 at Stack Overflow | Modified files portion | https://stackoverflow.com/questions/17366675/using-get-childitem-to-get-a-list-of-files-modified-in-the-last-3-days
 
 ChatGPT | Code cleanup and housekeeping
+
+Feel free to use this for whatever you'd like. If you're doing an article or something just credit me like normal.
