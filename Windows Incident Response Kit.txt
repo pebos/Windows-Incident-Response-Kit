@@ -1,0 +1,68 @@
+﻿# Prompt user for the drive letter to save the outputs
+do {
+    $driveLetter = Read-Host "Enter the drive letter where you want to save the outputs (e.g., 'E:')"
+    $driveExists = Test-Path -Path "${driveLetter}:\"
+    if (-not $driveExists) {
+        Write-Host "Specified drive $driveLetter does not exist. Please enter a valid drive letter."
+    }
+} until ($driveExists)
+
+# Get ARP table and save it to a file
+arp -a > "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_arp_table.txt"
+
+# Get TCP connections and save them to a file
+Get-NetTCPConnection > "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_tcp_connections.txt"
+
+# Get TCP settings and save them to a file
+Get-NetTCPSetting > "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_tcp_settings.txt"
+
+# Get running processes and save them to a file
+Get-Process > "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_running_processes.txt"
+
+# Iterate over each process
+foreach ($process in Get-Process) {
+    # Output process ID and name to file
+    "$('Process ID: ' + $process.Id), Name: $($process.Name)" | Out-File -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_open_directories_files_by_program.txt" -Append
+
+    try {
+        # Get file handles for the process
+        $handles = $process | Select-Object -ExpandProperty Handles | Where-Object { $_.TypeName -eq "File" }
+        if ($handles) {
+            # Output handles to file
+            foreach ($handle in $handles) {
+                "$('    Handle: ' + $handle.Handle + ' - ' + $handle.Object)" | Out-File -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_open_directories_files_by_program.txt" -Append
+            }
+        } else {
+            "    No file handles found." | Out-File -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_open_directories_files_by_program.txt" -Append
+        }
+    } catch {
+        "    Error occurred while retrieving handles." | Out-File -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_open_directories_files_by_program.txt" -Append
+    }
+
+    "" | Out-File -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_open_directories_files_by_program.txt" -Append
+}
+
+# Get recent Windows events and save them to a file
+Get-WinEvent -LogName * -MaxEvents 10000 | Where-Object { $_.TimeCreated -ge (Get-Date).AddHours(-24) } > "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_event_log.txt"
+
+# Get modified files in the last 24 hours and save them to a file
+Get-ChildItem -Path . -Recurse | Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-1) } | Out-File -Append "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_modified_files.txt"
+
+# Get startup applications and save them to a file
+Get-CimInstance -ClassName Win32_StartupCommand | Select-Object -Property Command, Description, User, Location | Format-List | Out-File -Append "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_startup_apps.txt"
+
+# Get local users and save them to a file
+Get-LocalUser > "{driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_local_users.txt"
+
+# Get Active Directory users and save them to a file
+Get-ADUser -Filter * -Properties Description, Enabled | Select-Object Name, Description, Enabled | Out-File -Append "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_ad_users.txt"
+
+# Get installed software and save it to a file
+foreach ($obj in Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall") {
+    write-host $obj.GetValue('DisplayName') -NoNewline
+    write-host "" -NoNewline
+    write-host $obj.GetValue('DisplayVersion')
+} Out-File -Append "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_installed_software.txt"
+
+# Get Windows Defender status and save it to a file
+Get-MpComputerStatus | Out-File -Append "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_defender_status.txt"
