@@ -42,8 +42,17 @@ foreach ($process in Get-Process) {
     "" | Out-File -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_open_directories_files_by_program.txt" -Append
 }
 
-# Get recent Windows events and save them to a file
-Get-WinEvent -LogName * -MaxEvents 10000 | Where-Object { $_.TimeCreated -ge (Get-Date).AddHours(-24) } > "${driveLetter}:\$(Get-Date -f yyyy-MM-dd_hh-mm)_event_log.txt"
+# Get recent Windows Application events and save them to a file
+# To add a limit simply add "-MaxEvents (Limit)" after "Application"
+Get-WinEvent -LogName Application | Where-Object { $_.TimeCreated -ge (Get-Date).AddHours(-24) } | Out-File -Append -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_application_event_log.txt"
+
+# Get recent Windows System events and save them to a file
+# To add a limit simply add "-MaxEvents (Limit)" after "System"
+Get-WinEvent -LogName System | Where-Object { $_.TimeCreated -ge (Get-Date).AddHours(-24) } | Out-File -Append -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_system_event_log.txt"
+
+# Get recent Windows Security events and save them to a file
+# To add a limit simply add "-MaxEvents (Limit)" after "System"
+Get-WinEvent -LogName Security | Where-Object { $_.TimeCreated -ge (Get-Date).AddHours(-24) } | Out-File -Append -FilePath "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_security_event_log.txt"
 
 # Get modified files in the last 24 hours and save them to a file
 Get-ChildItem -Path . -Recurse | Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-1) } | Out-File -Append "${driveLetter}:\$(Get-Date -Format 'yyyy-MM-dd_hh-mm')_modified_files.txt"
