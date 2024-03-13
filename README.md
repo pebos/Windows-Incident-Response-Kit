@@ -1,7 +1,7 @@
 # Windows-Incident-Response-Kit
 A Powershell script that will collect data from your Windows computer and save it to text files in a drive of your choice.
 
-This was made in part by ChatGBT and other information I found on the web (Credit below)
+Run in an Administrative Powershell and watch the magic happen.
 
 # What this will collect
   * Arp Table
