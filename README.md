@@ -15,6 +15,7 @@ Run in an Administrative Powershell and watch the magic happen.
   * Local accounts
   * Active directory accounts
   * Windows Defender information
+  * Current threats
 
 # Background
 
